@@ -24,7 +24,8 @@ namespace cw1
     {
         public static async Task Main(string[] args)
         {
-            if (args.Length == 0) return;
+            if (args.Length == 0) throw new ArgumentException("Parametr URL nie został podany");
+
             string url = args.Length > 0 ? args[0] : "https://www.pja.edu.pl";
             try
             {
