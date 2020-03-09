@@ -26,7 +26,10 @@ namespace cw1
         {
             if (args.Length == 0) throw new ArgumentException("Parametr URL nie został podany");
 
+            var urlRegex = new Regex("^(https?://)?[0 9a-zA-Z].[-_0-9a-zA-Z].[0-9a-zA-Z]+$");
+
             string url = args.Length > 0 ? args[0] : "https://www.pja.edu.pl";
+            if (urlRegex.Matches(url).Count == 0) throw new ArgumentException();
             try
             {
                 var httpClient = new HttpClient();
@@ -36,17 +39,34 @@ namespace cw1
                 var zbior = new HashSet<string>();
                 var slownik = new Dictionary<string, int>();
 
-                if (!response.IsSuccessStatusCode) return;
-                
-                string html = await response.Content.ReadAsStringAsync();
-                var regex = new Regex("[a-z]+[a-z0-9]*@[a-z.]+");
-                var matches = regex.Matches(html);
+                if (!response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Nie udało się pobrać strony");
+                    return;
+                }
+                else
+                {
+                    string html = await response.Content.ReadAsStringAsync();
+                    var regex = new Regex("[a-z]+[a-z0-9]*@[a-z.]+");
+                    var matches = regex.Matches(html);
 
-                    foreach (var m in matches)
+                    if(matches.Count == 0)
                     {
-                        Console.WriteLine(m);
+                        Console.WriteLine("Nie znaleziono adresów email");
                     }
-                
+                    else
+                    {
+                        foreach(string m in matches)
+                        {
+                            zbior.Add(m);
+                        }
+                        foreach(var m in zbior)
+                        {
+                            Console.WriteLine(m);
+                        }
+                    }
+                    httpClient.Dispose();
+                }
             }catch(Exception exc)
             {
                 //string.Format("Wystąpił błąd {0}", exc.ToString());
